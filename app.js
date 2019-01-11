@@ -36,4 +36,35 @@ function fetchPeopleWithPromises(){
 
 }
 
-fetchPeopleWithPromises();
+// fetchPeopleWithPromises();
+
+async function fetchpeopleWithAsync(){
+
+  try {
+
+    let url = 'https://swapi.co/api/people/';
+    let peopleSet = await superagent.get(url);
+
+    let people = peopleSet.body && peopleSet.body.results || [];
+
+    let peopleRequests = people.map( person => {
+      return superagent.get(person.url);
+    });
+    let swapiNames = await Promise.all(peopleRequests)
+      .then( people => {
+        let names = [];
+        for(let data of people) {
+          names.push(data.body.name);
+        }
+        return names;
+      });
+    return swapiNames;
+  }
+  catch (e) {console.error(e);}
+}
+
+fetchpeopleWithAsync()
+  .then( (names) => {
+    console.log(names);
+  })
+  .catch( err => {throw new Error(err);});
